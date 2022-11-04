@@ -28,4 +28,9 @@ class Hospital extends Model
     {
         return $this->hasMany(Ticket::class);
     }
+
+    public function getLogoAttribute()
+    {
+        return $this->photo ? asset('storage/' . $this->photo) : 'https://ui-avatars.com/api/?name=' . $this->name . '&color=7F9CF5&background=EBF4FF'; 
+    }
 }

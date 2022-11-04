@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\HospitalController;
+use App\Http\Controllers\TicketController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -15,4 +18,14 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
+});
+
+Auth::routes(['register' => 'false']);
+
+Route::middleware(['auth'])->group(function () {
+    Route::view('home', 'home')->name('home');
+    Route::resource('hospital', HospitalController::class);
+    Route::post('/hospital/{slug}/changeStatus', [HospitalController::class, 'changeStatus'])->name('hospital.changeStatus');
+    Route::resource('ticket', TicketController::class);
+    Route::resource('user', UserController::class);
 });
