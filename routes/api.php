@@ -2,8 +2,6 @@
 
 use App\Http\Controllers\API\AuthController;
 use App\Http\Controllers\Api\HospitalController;
-use App\Http\Controllers\Api\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -29,4 +27,4 @@ Route::controller(AuthController::class)->group(function () {
     }); 
 });
 
-Route::apiResource('hospital', HospitalController::class, ['only' => ['index', 'show']]);
+Route::get('hospital', [HospitalController::class, 'index']);
