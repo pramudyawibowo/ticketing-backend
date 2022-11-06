@@ -26,7 +26,7 @@ Route::controller(AuthController::class)->group(function () {
             Route::post('/', 'update');
         });
         Route::post('/logout', 'logout');
-    });
-
-    Route::apiResource('hospital', HospitalController::class, ['only' => ['index', 'show']]);
+    }); 
 });
+
+Route::apiResource('hospital', HospitalController::class, ['only' => ['index', 'show']]);
