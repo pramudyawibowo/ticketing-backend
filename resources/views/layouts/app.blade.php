@@ -100,6 +100,14 @@ data-kt-app-sidebar-push-header="true" data-kt-app-sidebar-push-toolbar="true" d
     <script src="{{ asset('assets/js/custom/utilities/modals/new-target.js') }}"></script>
     <script src="{{ asset('assets/js/custom/utilities/modals/users-search.js') }}"></script>
 
+    @include('components.toastr')
+    <script>
+        @if (app()->environment('production'))
+            $(document).ready(function() {
+                console.clear();
+            });
+        @endif
+    </script>
     @stack('scripts')
 </body>
 

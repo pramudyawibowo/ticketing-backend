@@ -3,6 +3,7 @@
 use App\Http\Controllers\HospitalController;
 use App\Http\Controllers\TicketController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -20,10 +21,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes(['register' => 'false']);
+Auth::routes(['register' => false, 'reset' => false, 'verify' => false]);
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware('auth', 'role:Admin|User')->group(function () {
     Route::view('home', 'home')->name('home');
+});
+
+Route::middleware('auth', 'role:Admin')->group(function () {
     Route::resource('hospital', HospitalController::class);
     Route::post('/hospital/{slug}/changeStatus', [HospitalController::class, 'changeStatus'])->name('hospital.changeStatus');
     Route::resource('ticket', TicketController::class);

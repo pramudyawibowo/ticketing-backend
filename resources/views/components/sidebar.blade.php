@@ -38,6 +38,7 @@
                         <span class="menu-title">Home</span>
                     </a>
                 </div>
+                @hasrole('Admin')
                 <div class="menu-item">
                     <a class="menu-link {{ Route::is('hospital.*') ? 'active' : '' }}" href="{{ route('hospital.index') }}">
                         <span class="menu-icon">
@@ -80,6 +81,7 @@
                         <span class="menu-title">User</span>
                     </a>
                 </div>
+                @endhasrole
             </div>
         </div>
     </div>

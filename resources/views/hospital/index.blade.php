@@ -169,9 +169,36 @@
             })
         }
 
+        $(document).on("change", "#active", function(e) {
+            e.preventDefault();
+            var slug = $(this).data("slug");
+            var url = "{{ route('hospital.changeStatus', ':slug') }}";
+            url = url.replace(':slug', slug);
+            var checked = this.checked ? 1 : 0;
+            $.ajax({
+                type: 'POST',
+                url: url,
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                data: {
+                    'active': checked,
+                },
+                success: function(response) {
+                    toastr.success(response.message);
+                    datatable.ajax.reload();
+                },
+                error: function(xhr) {
+                    var json = JSON.parse(xhr.responseText);
+                    toastr.error(json.message);
+                }
+            });
+        });
+
         $(document).on("click", "#delete-confirm", function(e) {
             e.preventDefault();
-            console.log("test");
+            var slug = $(this).data("slug");
+            console.log(slug);
             Swal.fire({
                 customClass: {
                     confirmButton: 'btn btn-danger',
@@ -214,7 +241,7 @@
                                     confirmButton: 'btn btn-success',
                                 },
                                 title: 'Error',
-                                text: json.error,
+                                text: json.message,
                                 icon: 'error',
                                 confirmButtonText: 'OK'
                             })

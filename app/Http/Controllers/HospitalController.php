@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Hospital;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Yajra\DataTables\DataTables;
 
 class HospitalController extends Controller
@@ -15,31 +16,26 @@ class HospitalController extends Controller
      */
     public function index(Request $request)
     {
-        if($request->ajax()) {
+        if ($request->ajax()) {
             $hospital = Hospital::get();
             return DataTables::of($hospital)
-            ->addIndexColumn()
-            ->addColumn('time', function ($item) {
-                return $item->open_time . ' - ' . $item->close_time;
-            })
-            ->editColumn('photo', function ($item) {
-                return '<img src="'. $item->logo .'" class="img-fluid">';
-            })
-            ->addColumn('status', function ($item) {
-                if ($item->active) {
-                    return '<div class="form-check form-switch form-check-custom form-check-solid ps-3">
-                        <input class="form-check-input status-table" onchange="changeStatus(this)" type="checkbox" id="active" value="1" data-slug="' . $item->slug . '" checked />
-                        <span class="fw-bold ps-2 fs-6" id="status" data-slug="' . $item->slug . '">Aktif</span>
-                    </div>';
-                } else {
-                    return '<div class="form-check form-switch form-check-custom form-check-solid ps-3">
-                        <input class="form-check-input status-table" onchange="changeStatus(this)" type="checkbox" id="active" value="0" data-slug="' . $item->slug . '"/>
-                        <span class="fw-bold ps-2 fs-6" id="status" data-slug="' . $item->slug . '">Nonaktif</span>
-                    </div>';
-                }
-            })
-            ->addColumn('actions', function ($item) {
-                return '<div class="dropdown">
+                ->addIndexColumn()
+                ->addColumn('time', function ($item) {
+                    return $item->open_time . ' - ' . $item->close_time;
+                })
+                ->editColumn('photo', function ($item) {
+                    return '<img src="' . $item->logo . '" class="img-fluid">';
+                })
+                ->addColumn('status', function ($item) {
+                    return '<div class="form-check form-switch form-check-custom form-check-solid">
+                                <input class="form-check-input" type="checkbox" name="active" id="active" value="' . $item->active . '" ' . ($item->active ? 'checked' : '') . ' data-slug="' . $item->slug . '"/>
+                                <label class="form-check-label" for="active" id="labelActive">
+                                    ' . ($item->active ? 'Aktif' : 'Nonaktif') . '
+                                </label>
+                            </div>';
+                })
+                ->addColumn('actions', function ($item) {
+                    return '<div class="dropdown">
                 <button type="button" class="btn btn-secondary btn-sm btn-active-light-primary rotate" data-kt-menu-trigger="click" data-kt-menu-placement="bottom-start" data-bs-toggle="dropdown">
                     Pilihan
                     <span class="svg-icon svg-icon-3 rotate-180 ms-3 me-0">
@@ -54,9 +50,9 @@ class HospitalController extends Controller
                     </div>
                 </div>
             </div>';
-            })
-            ->rawColumns(['status', 'photo', 'actions'])
-            ->make();
+                })
+                ->rawColumns(['status', 'photo', 'actions'])
+                ->make();
         }
 
         return view('hospital.index');
@@ -69,7 +65,7 @@ class HospitalController extends Controller
      */
     public function create()
     {
-        //
+        return view('hospital.create');
     }
 
     /**
@@ -80,7 +76,43 @@ class HospitalController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'name'          => 'required',
+            'address'       => 'required',
+            'phonenumber'   => 'required|unique:hospitals,phonenumber',
+            'active'        => 'required',
+            'capacity'      => 'required',
+            'open_time'     => 'required',
+            'close_time'    => 'required',
+            'photo'         => 'mimes:png,jpg|max:1024'
+        ], [
+            'name'          => 'Nama tidak boleh kosong!',
+            'address'       => 'Alamat tidak boleh kosong!',
+            'phonenumber.required'  => 'Nomor telepon tidak boleh kosong!',
+            'phonenumber.unique'    => 'Nomor telepon sudah digunakan!',
+            'open_time'     => 'Jam buka tidak boleh kosong!',
+            'close_time'    => 'Jam tutup tidak boleh kosong!',
+            'photo.mimes'   => 'Format file logo bukan png atau jpg',
+            'photo.max'     => 'Ukuran file logo terlalu besar (max. 1MB)',
+            'capacity'      => 'Kapasitas tidak boleh kosong!',
+        ]);
+
+        $logo = $request->file('photo');
+
+        if ($logo) {
+        }
+
+        $hospital = Hospital::create([
+            'name'          => $request->name,
+            'address'       => $request->address,
+            'phonenumber'   => $request->phonenumber,
+            'active'        => $request->active,
+            'capacity'      => $request->capacity,
+            'open_time'     => $request->open_time,
+            'close_time'    => $request->close_time,
+        ]);
+
+        return to_route('hospital.index')->with('success', 'Rumah Sakit berhasil diinput!');
     }
 
     /**
@@ -117,14 +149,30 @@ class HospitalController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function destroy($slug)
     {
-        //
+        DB::beginTransaction();
+        try {
+            $hospital = Hospital::findBySlugOrFail($slug);
+            $hospital->delete();
+            DB::commit();
+            return response()->json(['message' => 'Rumah sakit berhasil dihapus'], 200);
+        } catch (\Throwable $th) {
+            return response()->json(['message' => $th->getMessage()], 500);
+        }
+    }
+
+    public function changeStatus($slug, Request $request)
+    {
+        DB::beginTransaction();
+        try {
+            $hospital = Hospital::findBySlugOrFail($slug);
+            $hospital->update(['active' => $request->active]);
+            DB::commit();
+            return response()->json(['message' => 'Status ' . $hospital->name . ' diupdate']);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json(['message' => 'Status ' . $hospital->name . ' gagal diupdate']);
+        }
     }
 }

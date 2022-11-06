@@ -5,10 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Cviebrock\EloquentSluggable\Sluggable;
+use Cviebrock\EloquentSluggable\SluggableScopeHelpers;
 
 class Hospital extends Model
 {
-    use HasFactory, Sluggable;
+    use HasFactory, Sluggable, SluggableScopeHelpers;
 
     public function sluggable(): array
     {
@@ -21,7 +22,7 @@ class Hospital extends Model
     }
 
     protected $fillable = [
-        'name', 'slug', 'address', 'photo', 'open_time', 'close_time', 'active', 'capacity'
+        'name', 'slug', 'address', 'photo', 'open_time', 'close_time', 'active', 'capacity', 'phonenumber'
     ];
 
     public function tickets()

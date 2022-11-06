@@ -30,9 +30,11 @@ class AuthController extends Controller
                 'password'  => Hash::make($request->password),
             ]);
 
+            $user->assignRole('User');
+
             $token = $user->createToken('auth_token')->plainTextToken;
 
-            return response()->json(['message' => 'Registrasi Sukses', 'token' => $token, 'token_type' => 'Bearer'], 200);
+            return response()->json(['message' => 'Registrasi Sukses', 'token' => $token, 'token_type' => 'Bearer'], 201);
         } catch (\Throwable $th) {
             return response()->json(['message' => $th->getMessage()], 500);
         }
@@ -46,10 +48,15 @@ class AuthController extends Controller
                 'password'  => 'required'
             ], [
                 'email.required'    => 'Email tidak boleh kosong!',
+                'email.email'       => 'Masukkan email dengan benar!',
                 'password.required' => 'Password tidak boleh kosong!'
             ]);
 
-            $user = User::where('email', $request['email'])->firstOrFail();
+            $user = User::firstWhere('email', $request['email']);
+
+            if(!$user){
+                return response()->json(['message' => 'Data tidak ditemukan, silahkan mendaftar terlebih dahulu!'], 401);
+            }
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -78,7 +85,7 @@ class AuthController extends Controller
                 'email'     => $request->email ?? $user->email,
                 'password'  => $request->password ? Hash::make($request->password) : $user->password,
             ]);
-            return response()->json(['message' => 'Update Sukses', 'data' => $user], 200);
+            return response()->json(['message' => 'Update Sukses', 'data' => $user], 201);
         } catch (\Throwable $th) {
             return response()->json(['message' => $th->getMessage()], 500);
         }

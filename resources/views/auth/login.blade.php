@@ -28,12 +28,8 @@
                                     </span>
                                 @enderror
                             </div>
-                            <div class="fv-row mb-3">
+                            <div class="fv-row mb-8">
                                 <input type="password" placeholder="Password" name="password" class="form-control bg-transparent @error('password') is-invalid @enderror" autocomplete="current-password" required />
-                            </div>
-                            <div class="d-flex flex-stack flex-wrap gap-3 fs-base fw-semibold mb-8">
-                                <div></div>
-                                <a href="{{ route('password.request') }}" class="link-primary">Forgot Password ?</a>
                             </div>
                             <div class="d-grid mb-10">
                                 <button type="submit" id="kt_sign_in_submit" class="btn btn-primary">
@@ -41,9 +37,6 @@
                                     <span class="indicator-progress">Please wait...
                                         <span class="spinner-border spinner-border-sm align-middle ms-2"></span></span>
                                 </button>
-                            </div>
-                            <div class="text-gray-500 text-center fw-semibold fs-6">Not a Member yet?
-                                <a href="{{ route('register') }}" class="link-primary">Sign up</a>
                             </div>
                         </form>
                     </div>
